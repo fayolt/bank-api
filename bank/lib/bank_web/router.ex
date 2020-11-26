@@ -23,7 +23,11 @@ defmodule BankWeb.Router do
   scope "/api", BankWeb do
     pipe_through :api
 
-    resources "/customers", CustomerController, except: [:new, :edit]
+    resources "/customers", CustomerController, except: [:new, :edit] do
+      # nesting /accounts resources into /customers since an account belongs to a customer
+      resources "/accounts", AccountController, only: [:index, :create, :show]
+    end
+    get "/accounts", AccountController, :full_index
   end
 
   # Enables LiveDashboard only for development

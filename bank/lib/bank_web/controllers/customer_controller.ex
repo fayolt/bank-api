@@ -21,17 +21,17 @@ defmodule BankWeb.CustomerController do
   end
 
   def update(conn, %{"id" => id, "customer" => customer_params}) do
-    customer = Core.get_customer!(id)
+    customer = Bank.Core.get_customer!(id)
 
-    with {:ok, %Customer{} = customer} <- Core.update_customer(customer, customer_params) do
+    with {:ok, %Bank.Core.Customer{} = customer} <- Bank.Core.update_customer(customer, customer_params) do
       render(conn, "show.json", customer: customer)
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    customer = Core.get_customer!(id)
+    customer = Bank.Core.get_customer!(id)
 
-    with {:ok, %Customer{}} <- Core.delete_customer(customer) do
+    with {:ok, %Bank.Core.Customer{}} <- Bank.Core.delete_customer(customer) do
       send_resp(conn, :no_content, "")
     end
   end

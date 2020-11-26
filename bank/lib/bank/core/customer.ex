@@ -7,6 +7,8 @@ defmodule Bank.Core.Customer do
   schema "customers" do
     field :name, :string
 
+    has_many :accounts, Bank.Core.Account
+
     timestamps()
   end
 

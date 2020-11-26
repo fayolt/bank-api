@@ -20,7 +20,8 @@ defmodule Bank.Core.Account do
   @doc false
   def changeset(account, attrs) do
     account
-    |> cast(attrs, [:number, :alias, :type, :balance, :currency, :opening_date])
-    |> validate_required([:balance, :currency])
+    |> cast(attrs, [:number, :alias, :type, :balance, :currency, :opening_date, :customer_id])
+    |> validate_required([:balance, :currency, :customer_id])
+    |> assoc_constraint(:owner)
   end
 end

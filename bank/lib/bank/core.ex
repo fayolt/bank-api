@@ -18,7 +18,7 @@ defmodule Bank.Core do
 
   """
   def list_customers do
-    Repo.all(Customer)
+    Repo.all(Customer) |> Repo.preload(:accounts)
   end
 
   @doc """
@@ -35,7 +35,7 @@ defmodule Bank.Core do
       ** (Ecto.NoResultsError)
 
   """
-  def get_customer!(id), do: Repo.get!(Customer, id)
+  def get_customer!(id), do: Repo.get!(Customer, id) |> Repo.preload(:accounts)
 
   @doc """
   Creates a customer.
@@ -118,6 +118,19 @@ defmodule Bank.Core do
   end
 
   @doc """
+  Returns the list of accounts owned by a given customer.
+
+  ## Examples
+
+      iex> list_customer_accounts(1)
+      [%Account{}, ...]
+
+  """
+  def list_customer_accounts(customer_id) do
+    Repo.all(from a in Account, where: a.customer_id == ^customer_id)
+  end
+
+  @doc """
   Gets a single account.
 
   Raises `Ecto.NoResultsError` if the Account does not exist.
@@ -132,6 +145,22 @@ defmodule Bank.Core do
 
   """
   def get_account!(id), do: Repo.get!(Account, id)
+
+  @doc """
+  Gets a single account owned by a given customer.
+
+  Raises `Ecto.NoResultsError` if the Account does not exist.
+
+  ## Examples
+
+      iex> get_account!(123, 1)
+      %Account{}
+
+      iex> get_account!(456, 1)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_customer_account!(id, customer_id), do: Repo.get_by!(Account, [ id: id, customer_id: customer_id])
 
   @doc """
   Creates a account.
