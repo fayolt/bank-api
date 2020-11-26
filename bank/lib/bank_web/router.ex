@@ -20,9 +20,11 @@ defmodule BankWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", BankWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", BankWeb do
+    pipe_through :api
+
+    resources "/customers", CustomerController, except: [:new, :edit]
+  end
 
   # Enables LiveDashboard only for development
   #
