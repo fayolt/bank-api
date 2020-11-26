@@ -12,7 +12,8 @@ defmodule BankWeb.CustomerView do
 
   def render("customer.json", %{customer: customer}) do
     %{id: customer.id,
-      name: customer.name}
+      name: customer.name,
+      accounts: render_many(customer.accounts, BankWeb.AccountView, "account.json")}
   end
 
 end

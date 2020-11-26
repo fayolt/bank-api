@@ -28,4 +28,9 @@ defmodule BankWeb.AccountController do
     render(conn, "show.json", account: account)
   end
 
+  def balance(conn, %{"customer_id" => customer_id, "account_id" => account_id}) do
+    account = Bank.Core.get_customer_account!(account_id, customer_id)
+    render(conn, "balance.json", account: account)
+  end
+
 end

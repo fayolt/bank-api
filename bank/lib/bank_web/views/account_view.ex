@@ -19,4 +19,6 @@ defmodule BankWeb.AccountView do
       currency: account.currency,
       opening_date: account.opening_date}
   end
+
+  def render("balance.json", %{account: account}), do: %{balance: account.balance}
 end

@@ -25,7 +25,9 @@ defmodule BankWeb.Router do
 
     resources "/customers", CustomerController, except: [:new, :edit] do
       # nesting /accounts resources into /customers since an account belongs to a customer
-      resources "/accounts", AccountController, only: [:index, :create, :show]
+      resources "/accounts", AccountController, only: [:index, :create, :show] do
+        get "/balance", AccountController, :balance
+      end
     end
     get "/accounts", AccountController, :full_index
   end
