@@ -1,11 +1,10 @@
-# Script for populating the database. You can run it as:
-#
-#     mix run priv/repo/seeds.exs
-#
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     Bank.Repo.insert!(%Bank.SomeSchema{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
+alias Bank.Core
+
+%{"customers" => customers} = File.read!("customers.json") |> Jason.decode!
+
+customers |> Enum.each(fn customer -> Core.create_customer(customer) end)
+
+# new_customers = customers |> Enum.map(fn customer_data -> Core.Customer.changeset(%Core.Customer{}, customer_data) end)
+# new_customers |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
+
+
