@@ -229,4 +229,118 @@ defmodule Bank.Core do
 
   def generate_account_number(), do: "EE#{:rand.uniform(999_000) + 99999}"
   
+
+  alias Bank.Core.Transaction
+
+  @doc """
+  Returns the list of transactions.
+
+  ## Examples
+
+      iex> list_transactions()
+      [%Transaction{}, ...]
+
+  """
+  def list_transactions do
+    Repo.all(Transaction) |> Repo.preload([:origin, :destination])
+  end
+
+  @doc """
+  Gets a single transaction.
+
+  Raises `Ecto.NoResultsError` if the Transaction does not exist.
+
+  ## Examples
+
+      iex> get_transaction!(123)
+      %Transaction{}
+
+      iex> get_transaction!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_transaction!(id), do: Repo.get!(Transaction, id) |> Repo.preload([:origin, :destination])
+  
+  @doc """
+  Creates a transaction.
+
+  ## Examples
+
+      iex> create_transaction(%{field: value})
+      {:ok, %Transaction{}}
+
+      iex> create_transaction(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_transaction(attrs \\ %{}) do
+    %Transaction{}
+    |> Transaction.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a transaction.
+
+  ## Examples
+
+      iex> update_transaction(transaction, %{field: new_value})
+      {:ok, %Transaction{}}
+
+      iex> update_transaction(transaction, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_transaction(%Transaction{} = transaction, attrs) do
+    transaction
+    |> Transaction.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking transaction changes.
+
+  ## Examples
+
+      iex> change_transaction(transaction)
+      %Ecto.Changeset{data: %Transaction{}}
+
+  """
+  def change_transaction(%Transaction{} = transaction, attrs \\ %{}) do
+    Transaction.changeset(transaction, attrs)
+  end
+
+  defp is_balance_sufficient(account_id, amount) do
+    query = from a in Account,
+      where: a.id == ^account_id,
+      select: a.balance
+    (Repo.all(query) >= amount) |> IO.inspect
+  end
+
+  def process_transaction(attrs) do 
+    case is_balance_sufficient(attrs["origin_account_id"], attrs["amount"]) do
+      false -> {:error, :insufficient_funds}
+      _ -> origin_account = get_account!(attrs["origin_account_id"])
+          destination_account = get_account!(attrs["destination_account_id"])
+          Ecto.Multi.new()
+          |> Ecto.Multi.update(
+            :origin_account, 
+            Account.changeset(origin_account, %{balance: origin_account.balance - attrs["amount"]})
+          )
+          |> Ecto.Multi.update(
+            :destination_account, 
+            Account.changeset(destination_account, %{balance: destination_account.balance + attrs["amount"]})
+          )
+          |> Ecto.Multi.insert(
+            :transaction,
+            %Transaction{} |> Transaction.changeset(attrs)
+          )
+          |> Repo.transaction()
+          |> case do
+            {:ok, %{transaction: transaction}} -> {:ok, transaction |> Repo.preload([:origin, :destination])}
+            {:error, _, reason, _} -> {:error, reason}
+          end
+    end
+  end
+
 end

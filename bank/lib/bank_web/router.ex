@@ -29,6 +29,7 @@ defmodule BankWeb.Router do
         get "/balance", AccountController, :balance
       end
     end
+    resources "/transactions", TransactionController, except: [:new, :edit]
     get "/accounts", AccountController, :full_index
   end
 

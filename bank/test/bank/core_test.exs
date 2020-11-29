@@ -130,4 +130,73 @@ defmodule Bank.CoreTest do
       assert %Ecto.Changeset{} = Core.change_account(account)
     end
   end
+
+  describe "transactions" do
+    alias Bank.Core.Transaction
+
+    @valid_attrs %{amount: 120.5, currency: "some currency", date: ~N[2010-04-17 14:00:00], description: "some description", status: "some status", type: "some type"}
+    @update_attrs %{amount: 456.7, currency: "some updated currency", date: ~N[2011-05-18 15:01:01], description: "some updated description", status: "some updated status", type: "some updated type"}
+    @invalid_attrs %{amount: nil, currency: nil, date: nil, description: nil, status: nil, type: nil}
+
+    def transaction_fixture(attrs \\ %{}) do
+      {:ok, transaction} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Core.create_transaction()
+
+      transaction
+    end
+
+    test "list_transactions/0 returns all transactions" do
+      transaction = transaction_fixture()
+      assert Core.list_transactions() == [transaction]
+    end
+
+    test "get_transaction!/1 returns the transaction with given id" do
+      transaction = transaction_fixture()
+      assert Core.get_transaction!(transaction.id) == transaction
+    end
+
+    test "create_transaction/1 with valid data creates a transaction" do
+      assert {:ok, %Transaction{} = transaction} = Core.create_transaction(@valid_attrs)
+      assert transaction.amount == 120.5
+      assert transaction.currency == "some currency"
+      assert transaction.date == ~N[2010-04-17 14:00:00]
+      assert transaction.description == "some description"
+      assert transaction.status == "some status"
+      assert transaction.type == "some type"
+    end
+
+    test "create_transaction/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Core.create_transaction(@invalid_attrs)
+    end
+
+    test "update_transaction/2 with valid data updates the transaction" do
+      transaction = transaction_fixture()
+      assert {:ok, %Transaction{} = transaction} = Core.update_transaction(transaction, @update_attrs)
+      assert transaction.amount == 456.7
+      assert transaction.currency == "some updated currency"
+      assert transaction.date == ~N[2011-05-18 15:01:01]
+      assert transaction.description == "some updated description"
+      assert transaction.status == "some updated status"
+      assert transaction.type == "some updated type"
+    end
+
+    test "update_transaction/2 with invalid data returns error changeset" do
+      transaction = transaction_fixture()
+      assert {:error, %Ecto.Changeset{}} = Core.update_transaction(transaction, @invalid_attrs)
+      assert transaction == Core.get_transaction!(transaction.id)
+    end
+
+    test "delete_transaction/1 deletes the transaction" do
+      transaction = transaction_fixture()
+      assert {:ok, %Transaction{}} = Core.delete_transaction(transaction)
+      assert_raise Ecto.NoResultsError, fn -> Core.get_transaction!(transaction.id) end
+    end
+
+    test "change_transaction/1 returns a transaction changeset" do
+      transaction = transaction_fixture()
+      assert %Ecto.Changeset{} = Core.change_transaction(transaction)
+    end
+  end
 end

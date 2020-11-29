@@ -9,10 +9,12 @@ defmodule Bank.Core.Account do
     field :balance, :float
     field :currency, :string
     field :number, :string
-    field :opening_date, :date, default: Date.utc_today
+    field :opening_date, :date
     field :type, :string, default: "SAVINGS"
     
     belongs_to :owner, Bank.Core.Customer, foreign_key: :customer_id
+    has_many :initiated_transactions, Bank.Core.Transaction, foreign_key: :origin_account_id
+    has_many :destined_transactions, Bank.Core.Transaction, foreign_key: :destination_account_id
 
     timestamps()
   end
